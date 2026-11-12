@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-system-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-system
+  template:
+    metadata:
+      labels:
+        app: student-system
+    spec:
+      containers:
+        # --- POD 1: Container 1 ---
+        - name: api-gateway
+          image: sunragi/api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REG_URL
+              value: "http://localhost:5001"
+            - name: UPDATE_URL
+              value: "http://localhost:5002"
+            - name: JWT_SECRET
+              value: "your_jwt_secret_here"
+
+        # --- POD 1: Container 2 ---
+        - name: registration
+          image: sunragi/registration:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: update-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: update-service
+  template:
+    metadata:
+      labels:
+        app: update-service
+    spec:
+      containers:
+        # --- POD 2: Container 1 ---
+        - name: update-service
+          image: sunragi/update-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5002
